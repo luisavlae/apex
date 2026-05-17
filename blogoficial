@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ApexBioHome — Análise & Pesquisas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Playfair Display', 'serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            bg:      '#031a0e',
+            card:    '#0a1f12',
+            border:  '#1a3320',
+            primary: '#3dba6a',
+            muted:   '#4a7a5a',
+            soft:    '#c8e6d0',
+          }
+        }
+      }
+    }
+    </script>
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #031a0e;
+            color: #c8e6d0;
+        }
+
+        /* Star rating */
+        .stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star {
+            width: 14px;
+            height: 14px;
+            fill: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .star-empty {
+            fill: #1a3320;
+            color: #1a3320;
+        }
+
+        /* Feedback form hidden by default */
+        #feedback-form {
+            display: none;
+        }
+
+            #feedback-form.open {
+                display: block;
+            }
+
+        /* Animate cards on load */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-anim {
+            animation: fadeUp 0.5s ease both;
+        }
+
+            .card-anim:nth-child(1) {
+                animation-delay: 0.05s;
+            }
+
+            .card-anim:nth-child(2) {
+                animation-delay: 0.12s;
+            }
+
+            .card-anim:nth-child(3) {
+                animation-delay: 0.19s;
+            }
+
+            .card-anim:nth-child(4) {
+                animation-delay: 0.26s;
+            }
+
+            .card-anim:nth-child(5) {
+                animation-delay: 0.33s;
+            }
+
+            .card-anim:nth-child(6) {
+                animation-delay: 0.40s;
+            }
+
+        /* Input / select styling */
+        input, textarea, select {
+            background: #0f2718;
+            border: 1px solid #1a3320;
+            color: #c8e6d0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+            input::placeholder, textarea::placeholder {
+                color: #4a7a5a;
+            }
+
+            input:focus, textarea:focus, select:focus {
+                border-color: #3dba6a;
+            }
+
+            select option {
+                background: #0a1f12;
+            }
+
+        label {
+            font-size: 12px;
+            color: #a0c8b0;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        button.btn-primary {
+            background: #3dba6a;
+            color: #031a0e;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+        }
+
+            button.btn-primary:hover {
+                background: #35a85e;
+            }
+
+        button.btn-outline {
+            background: transparent;
+            color: #3dba6a;
+            font-weight: 600;
+            border: 1px solid #3dba6a;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+        }
+
+            button.btn-outline:hover {
+                background: #3dba6a22;
+            }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-green {
+            background: rgba(61,186,106,0.18);
+            color: #3dba6a;
+            border: 1px solid rgba(61,186,106,0.3);
+        }
+
+        .badge-gray {
+            background: rgba(255,255,255,0.07);
+            color: #a0c8b0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .badge-dark {
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .plant-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .img-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, #0a1f12 0%, rgba(10,31,18,0.4) 50%, transparent 100%);
+        }
+
+        /* Filter tab */
+        .filter-select {
+            background: #0a1f12;
+            border: 1px solid #1a3320;
+            color: #c8e6d0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        /* Section divider */
+        .section-divider {
+            border-top: 1px solid #1a3320;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="max-width:480px; margin:0 auto; min-height:100vh;">
+
+        <!-- ========== HERO ========== -->
+        <section style="background: linear-gradient(to bottom, rgba(61,186,106,0.08), transparent); border-bottom: 1px solid #1a3320; padding: 48px 20px 32px; position:relative; overflow:hidden;">
+            <div style="position:absolute;top:0;right:0;width:200px;height:200px;background:rgba(61,186,106,0.07);border-radius:50%;transform:translate(30%,-50%);filter:blur(40px);"></div>
+            <div style="text-align:center; position:relative;">
+                <h1 style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:#e8f5ee;margin-bottom:10px;line-height:1.2;">Análise & Pesquisas</h1>
+                <p style="font-size:14px;color:#4a7a5a;max-width:300px;margin:0 auto;line-height:1.6;">O que as pessoas dizem e o que a ciência comprova sobre nossas plantas.</p>
+            </div>
+        </section>
+
+        <!-- ========== FEEDBACKS ========== -->
+        <section style="padding: 28px 16px;">
+
+            <!-- Section header -->
+            <div style="margin-bottom:18px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    <span style="font-size:10px;font-weight:600;color:#3dba6a;letter-spacing:0.15em;text-transform:uppercase;">Feedbacks</span>
+                </div>
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+                    <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#e8f5ee;">O que dizem</h2>
+                    <div style="display:flex;align-items:center;gap:5px;background:rgba(61,186,106,0.1);border:1px solid rgba(61,186,106,0.2);border-radius:10px;padding:5px 10px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        <span style="font-size:15px;font-weight:700;color:#e8f5ee;">4.8</span>
+                        <span style="font-size:11px;color:#4a7a5a;">(6)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter + Button row -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <select class="filter-select" style="flex:1;" onchange="filterFeedbacks(this.value)">
+                    <option value="all">Todos os ambientes</option>
+                    <option value="sala_de_estar">Sala de Estar</option>
+                    <option value="quarto">Quarto</option>
+                    <option value="cozinha">Cozinha</option>
+                    <option value="banheiro">Banheiro</option>
+                    <option value="escritorio">Escritório</option>
+                    <option value="varanda">Varanda</option>
+                    <option value="jardim">Jardim</option>
+                </select>
+                <button class="btn-outline" onclick="toggleForm()">
+                    <svg id="form-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                    Avaliar
+                </button>
+            </div>
+
+            <!-- Feedback Form -->
+            <div id="feedback-form" style="margin-bottom:16px;">
+                <div style="background:#0a1f12;border:1px solid rgba(61,186,106,0.2);border-radius:16px;padding:16px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div>
+                            <label>Seu nome *</label>
+                            <input type="text" placeholder="Ex: Maria Silva" id="f-name" />
+                        </div>
+                        <div>
+                            <label>Planta *</label>
+                            <input type="text" placeholder="Ex: Jiboia" id="f-plant" />
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div>
+                            <label>Ambiente</label>
+                            <select id="f-env">
+                                <option value="">Selecione</option>
+                                <option value="sala_de_estar">Sala de Estar</option>
+                                <option value="quarto">Quarto</option>
+                                <option value="cozinha">Cozinha</option>
+                                <option value="banheiro">Banheiro</option>
+                                <option value="escritorio">Escritório</option>
+                                <option value="varanda">Varanda</option>
+                                <option value="jardim">Jardim</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Nota *</label>
+                            <div id="star-select" style="display:flex;gap:3px;padding-top:6px;">
+                                <span onclick="setRating(1)" class="star-btn" data-v="1">⭐</span>
+                                <span onclick="setRating(2)" class="star-btn" data-v="2">⭐</span>
+                                <span onclick="setRating(3)" class="star-btn" data-v="3">⭐</span>
+                                <span onclick="setRating(4)" class="star-btn" data-v="4">⭐</span>
+                                <span onclick="setRating(5)" class="star-btn" data-v="5">⭐</span>
+                            </div>
+                            <input type="hidden" id="f-rating" value="0" />
+                        </div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <label>Comentário *</label>
+                        <textarea id="f-comment" placeholder="Conte sua experiência com essa planta..." rows="3"></textarea>
+                    </div>
+                    <button class="btn-primary" style="width:100%;justify-content:center;" onclick="submitFeedback()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                        Enviar Feedback
+                    </button>
+                    <div id="form-msg" style="display:none;margin-top:8px;text-align:center;font-size:13px;color:#3dba6a;"></div>
+                </div>
+            </div>
+
+            <!-- Feedback Cards -->
+            <div id="feedback-list" style="display:flex;flex-direction:column;gap:14px;">
+
+                <!-- Card 1 -->
+                <div class="card-anim" data-env="quarto" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:140px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1572688484438-313a6e50c333?w=400&q=80" alt="Espada de São Jorge" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;bottom:10px;left:14px;display:flex;align-items:center;gap:5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+                            <span style="font-size:13px;font-weight:600;color:#e8f5ee;">Espada de São Jorge</span>
+                        </div>
+                        <div style="position:absolute;top:10px;right:10px;display:flex;gap:1px;">
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        </div>
+                    </div>
+                    <div style="padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:rgba(61,186,106,0.18);display:flex;align-items:center;justify-content:center;color:#3dba6a;font-weight:700;font-size:14px;flex-shrink:0;">M</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px;font-weight:600;color:#e8f5ee;margin:0;">Maria Oliveira</p>
+                                <p style="font-size:11px;color:#4a7a5a;margin:0;">13 mai 2026</p>
+                            </div>
+                            <span class="badge badge-gray">🛏 Quarto</span>
+                        </div>
+                        <div style="border-left:2px solid rgba(61,186,106,0.3);padding-left:12px;">
+                            <p style="font-size:13px;color:#7aad8e;line-height:1.6;font-style:italic;margin:0;">"Incrível como melhorou a qualidade do ar no meu quarto! Durmo muito melhor desde que coloquei essa planta."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="card-anim" data-env="escritorio" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:140px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1600411833196-7c1f6b1a8b90?w=400&q=80" alt="Jiboia" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;bottom:10px;left:14px;display:flex;align-items:center;gap:5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+                            <span style="font-size:13px;font-weight:600;color:#e8f5ee;">Jiboia</span>
+                        </div>
+                        <div style="position:absolute;top:10px;right:10px;display:flex;gap:1px;">
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star star-empty" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        </div>
+                    </div>
+                    <div style="padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:rgba(61,186,106,0.18);display:flex;align-items:center;justify-content:center;color:#3dba6a;font-weight:700;font-size:14px;flex-shrink:0;">C</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px;font-weight:600;color:#e8f5ee;margin:0;">Carlos Santos</p>
+                                <p style="font-size:11px;color:#4a7a5a;margin:0;">13 mai 2026</p>
+                            </div>
+                            <span class="badge badge-gray">💻 Escritório</span>
+                        </div>
+                        <div style="border-left:2px solid rgba(61,186,106,0.3);padding-left:12px;">
+                            <p style="font-size:13px;color:#7aad8e;line-height:1.6;font-style:italic;margin:0;">"Perfeita para o escritório. Além de linda, é super fácil de cuidar. O ambiente ficou muito mais agradável."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="card-anim" data-env="sala_de_estar" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:140px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1521334726092-b509a19597c6?w=400&q=80" alt="Lírio da Paz" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;bottom:10px;left:14px;display:flex;align-items:center;gap:5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+                            <span style="font-size:13px;font-weight:600;color:#e8f5ee;">Lírio da Paz</span>
+                        </div>
+                        <div style="position:absolute;top:10px;right:10px;display:flex;gap:1px;">
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        </div>
+                    </div>
+                    <div style="padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:rgba(61,186,106,0.18);display:flex;align-items:center;justify-content:center;color:#3dba6a;font-weight:700;font-size:14px;flex-shrink:0;">A</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px;font-weight:600;color:#e8f5ee;margin:0;">Ana Paula Ribeiro</p>
+                                <p style="font-size:11px;color:#4a7a5a;margin:0;">13 mai 2026</p>
+                            </div>
+                            <span class="badge badge-gray">🛋 Sala</span>
+                        </div>
+                        <div style="border-left:2px solid rgba(61,186,106,0.3);padding-left:12px;">
+                            <p style="font-size:13px;color:#7aad8e;line-height:1.6;font-style:italic;margin:0;">"Transformou minha sala! As flores brancas trazem uma elegância única. Já recebi vários elogios de visitas."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="card-anim" data-env="banheiro" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:140px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Samambaia" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;bottom:10px;left:14px;display:flex;align-items:center;gap:5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+                            <span style="font-size:13px;font-weight:600;color:#e8f5ee;">Samambaia</span>
+                        </div>
+                        <div style="position:absolute;top:10px;right:10px;display:flex;gap:1px;">
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star star-empty" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        </div>
+                    </div>
+                    <div style="padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:rgba(61,186,106,0.18);display:flex;align-items:center;justify-content:center;color:#3dba6a;font-weight:700;font-size:14px;flex-shrink:0;">F</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px;font-weight:600;color:#e8f5ee;margin:0;">Fernando Lima</p>
+                                <p style="font-size:11px;color:#4a7a5a;margin:0;">13 mai 2026</p>
+                            </div>
+                            <span class="badge badge-gray">🚿 Banheiro</span>
+                        </div>
+                        <div style="border-left:2px solid rgba(61,186,106,0.3);padding-left:12px;">
+                            <p style="font-size:13px;color:#7aad8e;line-height:1.6;font-style:italic;margin:0;">"A samambaia se adaptou perfeitamente ao banheiro. Deu um toque de natureza incrível ao ambiente."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="card-anim" data-env="cozinha" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:140px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1515586838455-8580757add03?w=400&q=80" alt="Alecrim" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;bottom:10px;left:14px;display:flex;align-items:center;gap:5px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+                            <span style="font-size:13px;font-weight:600;color:#e8f5ee;">Alecrim</span>
+                        </div>
+                        <div style="position:absolute;top:10px;right:10px;display:flex;gap:1px;">
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                            <svg class="star" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        </div>
+                    </div>
+                    <div style="padding:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:rgba(61,186,106,0.18);display:flex;align-items:center;justify-content:center;color:#3dba6a;font-weight:700;font-size:14px;flex-shrink:0;">J</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px;font-weight:600;color:#e8f5ee;margin:0;">Juliana Costa</p>
+                                <p style="font-size:11px;color:#4a7a5a;margin:0;">13 mai 2026</p>
+                            </div>
+                            <span class="badge badge-gray">🍳 Cozinha</span>
+                        </div>
+                        <div style="border-left:2px solid rgba(61,186,106,0.3);padding-left:12px;">
+                            <p style="font-size:13px;color:#7aad8e;line-height:1.6;font-style:italic;margin:0;">"Além de decorar a cozinha, uso o alecrim fresco nas receitas! Duas utilidades em uma planta só."</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /feedback-list -->
+        </section>
+
+        <!-- ========== PESQUISAS ========== -->
+        <section style="padding:28px 16px 48px;border-top:1px solid #1a3320;background:rgba(255,255,255,0.02);">
+
+            <div style="margin-bottom:18px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3dba6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" /></svg>
+                    <span style="font-size:10px;font-weight:600;color:#3dba6a;letter-spacing:0.15em;text-transform:uppercase;">Ciência</span>
+                </div>
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;">
+                    <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#e8f5ee;">Pesquisas profissionais</h2>
+                    <select class="filter-select" style="width:130px;flex-shrink:0;" onchange="filterResearch(this.value)">
+                        <option value="all">Todos</option>
+                        <option value="sala_de_estar">Sala</option>
+                        <option value="quarto">Quarto</option>
+                        <option value="cozinha">Cozinha</option>
+                        <option value="banheiro">Banheiro</option>
+                        <option value="escritorio">Escritório</option>
+                    </select>
+                </div>
+                <p style="font-size:13px;color:#4a7a5a;margin-top:4px;">Estudos científicos sobre benefícios das plantas em cada ambiente.</p>
+            </div>
+
+            <div id="research-list" style="display:flex;flex-direction:column;gap:14px;">
+
+                <!-- Research 1 -->
+                <div class="card-anim" data-env="quarto" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:150px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1572688484438-313a6e50c333?w=400&q=80" alt="Espada de São Jorge" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;top:10px;left:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                            <span class="badge badge-green">🌿 Espada de São Jorge</span>
+                            <span class="badge badge-gray">🛏 Quarto</span>
+                        </div>
+                        <span class="badge badge-dark" style="position:absolute;top:10px;right:10px;">2023</span>
+                    </div>
+                    <div style="padding:14px;">
+                        <h3 style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#e8f5ee;margin:0 0 5px;">Purificação do ar por Sansevieria em ambientes internos</h3>
+                        <p style="font-size:11px;color:#4a7a5a;margin:0 0 10px;display:flex;align-items:center;gap:4px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                            Dr. Pedro Machado · Engenheiro Agrônomo - USP
+                        </p>
+                        <p style="font-size:13px;color:#7aad8e;line-height:1.6;margin:0 0 12px;">Estudo em parceria com a NASA demonstrou que a Sansevieria é uma das mais eficientes na remoção de toxinas do ar, especialmente durante a noite.</p>
+                        <p style="font-size:11px;font-weight:600;color:#a0c8b0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Benefícios</p>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Remove formaldeído e benzeno do ar</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Produz oxigênio durante a noite</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Melhora a qualidade do sono</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research 2 -->
+                <div class="card-anim" data-env="escritorio" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:150px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1600411833196-7c1f6b1a8b90?w=400&q=80" alt="Jiboia" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;top:10px;left:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                            <span class="badge badge-green">🌿 Jiboia</span>
+                            <span class="badge badge-gray">💻 Escritório</span>
+                        </div>
+                        <span class="badge badge-dark" style="position:absolute;top:10px;right:10px;">2024</span>
+                    </div>
+                    <div style="padding:14px;">
+                        <h3 style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#e8f5ee;margin:0 0 5px;">Efeito de plantas ornamentais na produtividade</h3>
+                        <p style="font-size:11px;color:#4a7a5a;margin:0 0 10px;display:flex;align-items:center;gap:4px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                            Dra. Camila Andrade · Bióloga - UNICAMP
+                        </p>
+                        <p style="font-size:13px;color:#7aad8e;line-height:1.6;margin:0 0 12px;">Pesquisa com 200 profissionais mostrou que a Jiboia no ambiente de trabalho reduziu o estresse em 37% e aumentou a produtividade.</p>
+                        <p style="font-size:11px;font-weight:600;color:#a0c8b0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Benefícios</p>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Aumento de 15% na produtividade</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Redução do estresse em até 37%</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Absorção de compostos voláteis</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research 3 -->
+                <div class="card-anim" data-env="sala_de_estar" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:150px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1521334726092-b509a19597c6?w=400&q=80" alt="Lírio da Paz" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;top:10px;left:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                            <span class="badge badge-green">🌿 Lírio da Paz</span>
+                            <span class="badge badge-gray">🛋 Sala</span>
+                        </div>
+                        <span class="badge badge-dark" style="position:absolute;top:10px;right:10px;">2023</span>
+                    </div>
+                    <div style="padding:14px;">
+                        <h3 style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#e8f5ee;margin:0 0 5px;">Spathiphyllum: purificação e humidificação natural</h3>
+                        <p style="font-size:11px;color:#4a7a5a;margin:0 0 10px;display:flex;align-items:center;gap:4px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                            Prof. Ricardo Nunes · Botânico - UFRJ
+                        </p>
+                        <p style="font-size:13px;color:#7aad8e;line-height:1.6;margin:0 0 12px;">O Lírio da Paz filtra toxinas e atua como umidificador natural, ideal para salas de estar onde a família passa mais tempo.</p>
+                        <p style="font-size:11px;font-weight:600;color:#a0c8b0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Benefícios</p>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Aumenta umidade do ar em até 5%</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Remove mofo e esporos do ambiente</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Efeito calmante comprovado</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Research 4 -->
+                <div class="card-anim" data-env="cozinha" style="border-radius:16px;overflow:hidden;border:1px solid #1a3320;background:#0a1f12;box-shadow:0 4px 20px rgba(0,0,0,0.4);">
+                    <div style="position:relative;height:150px;overflow:hidden;">
+                        <img class="plant-img" src="https://images.unsplash.com/photo-1515586838455-8580757add03?w=400&q=80" alt="Alecrim" />
+                        <div class="img-gradient"></div>
+                        <div style="position:absolute;top:10px;left:10px;display:flex;flex-wrap:wrap;gap:5px;">
+                            <span class="badge badge-green">🌿 Alecrim</span>
+                            <span class="badge badge-gray">🍳 Cozinha</span>
+                        </div>
+                        <span class="badge badge-dark" style="position:absolute;top:10px;right:10px;">2024</span>
+                    </div>
+                    <div style="padding:14px;">
+                        <h3 style="font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#e8f5ee;margin:0 0 5px;">Plantas aromáticas na cozinha: benefícios além da culinária</h3>
+                        <p style="font-size:11px;color:#4a7a5a;margin:0 0 10px;display:flex;align-items:center;gap:4px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>
+                            Dra. Mariana Souza · Nutricionista e Fitoterapeuta
+                        </p>
+                        <p style="font-size:13px;color:#7aad8e;line-height:1.6;margin:0 0 12px;">O Alecrim vai muito além do tempero: suas propriedades antimicrobianas ajudam a manter a cozinha mais higiênica e seu aroma repele insetos.</p>
+                        <p style="font-size:11px;font-weight:600;color:#a0c8b0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Benefícios</p>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Propriedades antimicrobianas naturais</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Repele insetos indesejados</span></div>
+                            <div style="display:flex;align-items:flex-start;gap:6px;"><span style="color:#3dba6a;font-size:12px;margin-top:1px;">✓</span><span style="font-size:12px;color:#7aad8e;">Estimula a memória e concentração</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /research-list -->
+        </section>
+
+    </div><!-- /container -->
+
+    <script>
+  let formOpen = false;
+  let currentRating = 0;
+
+  function toggleForm() {
+    formOpen = !formOpen;
+    const el = document.getElementById('feedback-form');
+    const chevron = document.getElementById('form-chevron');
+    el.style.display = formOpen ? 'block' : 'none';
+    chevron.style.transform = formOpen ? 'rotate(180deg)' : '';
+  }
+
+  function setRating(val) {
+    currentRating = val;
+    document.getElementById('f-rating').value = val;
+    const btns = document.querySelectorAll('.star-btn');
+    btns.forEach((b, i) => {
+      b.style.opacity = i < val ? '1' : '0.3';
+    });
+  }
+
+  function submitFeedback() {
+    const name = document.getElementById('f-name').value.trim();
+    const plant = document.getElementById('f-plant').value.trim();
+    const comment = document.getElementById('f-comment').value.trim();
+    const rating = parseInt(document.getElementById('f-rating').value);
+    const msg = document.getElementById('form-msg');
+
+    if (!name || !plant || !comment || !rating) {
+      msg.style.display = 'block';
+      msg.style.color = '#f87171';
+      msg.textContent = '⚠ Preencha todos os campos obrigatórios.';
+      return;
+    }
+
+    // Simulated success (no backend in static version)
+    msg.style.display = 'block';
+    msg.style.color = '#3dba6a';
+    msg.textContent = '✓ Feedback enviado com sucesso! (versão estática)';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-plant').value = '';
+    document.getElementById('f-comment').value = '';
+    document.getElementById('f-rating').value = 0;
+    setRating(0);
+  }
+
+  function filterFeedbacks(env) {
+    const cards = document.querySelectorAll('#feedback-list .card-anim');
+    cards.forEach(card => {
+      card.style.display = (env === 'all' || card.dataset.env === env) ? 'block' : 'none';
+    });
+  }
+
+  function filterResearch(env) {
+    const cards = document.querySelectorAll('#research-list .card-anim');
+    cards.forEach(card => {
+      card.style.display = (env === 'all' || card.dataset.env === env) ? 'block' : 'none';
+    });
+  }
+    </script>
+</body>
+</html>
